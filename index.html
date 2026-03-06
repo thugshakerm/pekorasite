@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" class="rbx-site">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pekora.zip — Trading Dashboard</title>
+  <meta name="description" content="Item values, trade tracking, and market data for pekora.zip — the Korone Roblox revival." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="https://www.pekora.zip/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAVIGATION — authentic .rbx-header
+════════════════════════════════════════════════════════════ -->
+<nav class="rbx-header" role="navigation">
+  <div class="nav-inner">
+
+    <!-- Logo -->
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-img">P</div>
+      <span>pekora.zip</span>
+    </a>
+
+    <!-- Nav Links -->
+    <ul class="nav-links">
+      <li class="active">
+        <a href="/">🏠 Home</a>
+      </li>
+      <li>
+        <a href="https://www.pekora.zip/catalog" target="_blank">🛍 Catalog ▾</a>
+        <div class="nav-dropdown">
+          <a href="https://www.pekora.zip/catalog?Category=11" target="_blank">Limiteds</a>
+          <a href="https://www.pekora.zip/catalog?Category=12" target="_blank">Limited Uniques</a>
+          <a href="https://www.pekora.zip/catalog?Category=1" target="_blank">All Accessories</a>
+          <a href="https://www.pekora.zip/catalog?Category=2" target="_blank">Hats</a>
+          <a href="https://www.pekora.zip/catalog?Category=40" target="_blank">Faces</a>
+        </div>
+      </li>
+      <li>
+        <a href="https://www.pekora.zip/games" target="_blank">🎮 Games</a>
+      </li>
+      <li>
+        <a href="https://www.pekora.zip/trade" target="_blank">🔄 Trade</a>
+      </li>
+      <li>
+        <a href="#" onclick="switchTab('values');return false;">📈 Values</a>
+      </li>
+    </ul>
+
+    <!-- Search -->
+    <div class="nav-search">
+      <input type="text" id="nav-search-input" placeholder="Search items, players…" autocomplete="off" />
+      <select class="search-type-sel" id="search-type">
+        <option value="items">Items</option>
+        <option value="users">Players</option>
+      </select>
+      <button onclick="doSearch()">🔍</button>
+    </div>
+
+    <!-- Right -->
+    <div class="nav-right">
+      <div id="api-status" class="api-status-badge">Connecting…</div>
+      <div id="nav-robux" class="nav-robux" style="display:none">
+        <span style="color:var(--rbx-green);font-weight:800">R$</span>
+        <span id="nav-robux-amount">—</span>
+      </div>
+      <a href="https://www.pekora.zip/login" target="_blank" class="nav-btn nav-btn-login" id="nav-login">Log In</a>
+      <a href="https://www.pekora.zip/newlogin" target="_blank" class="nav-btn nav-btn-signup" id="nav-signup">Sign Up</a>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     TICKER
+════════════════════════════════════════════════════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-label">LIVE MARKET</div>
+  <div class="ticker-scroll-wrap">
+    <div class="ticker-track" id="ticker-track"><!-- JS --></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE BODY
+════════════════════════════════════════════════════════════ -->
+<div class="page-body">
+
+  <!-- ── MAIN COLUMN ── -->
+  <main class="main-col">
+
+    <!-- Stats Strip -->
+    <div class="stats-strip" id="stats-bar">
+      <div class="stat-cell">
+        <div class="stat-label">Total Items</div>
+        <div class="stat-value" id="stat-items">0</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Active Traders</div>
+        <div class="stat-value" id="stat-traders">0</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Trades Today</div>
+        <div class="stat-value" id="stat-trades">0</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Volume (R$)</div>
+        <div class="stat-value" id="stat-volume">0</div>
+      </div>
+    </div>
+
+    <!-- Catalog Section -->
+    <div class="section-box">
+      <div class="rbx-tabs" id="catalog-tabs">
+        <div class="rbx-tab active" data-target="limiteds">Roblox Limiteds</div>
+        <div class="rbx-tab" data-target="ugc">UGC Items</div>
+        <div class="rbx-tab" data-target="top">Top RAP</div>
+        <div class="rbx-tab" data-target="new">New Arrivals</div>
+      </div>
+      <div class="item-cards-grid" id="main-item-grid"><!-- populated by JS --></div>
+      <div style="padding:8px 12px;border-top:1px solid var(--rbx-border);text-align:right">
+        <a href="https://www.pekora.zip/catalog" target="_blank" class="text-blue fs-small fw-bold">View Full Catalog →</a>
+      </div>
+    </div>
+
+    <!-- Value Changes -->
+    <div class="section-box" id="values-section">
+      <div class="section-header">
+        <div class="section-title"><div class="rbx-dot"></div>Value Changes</div>
+        <span class="text-muted fs-small">Last 24h</span>
+      </div>
+      <table class="rbx-table" style="width:100%">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>RAP</th>
+            <th>Value</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody id="value-changes-body"><!-- JS --></tbody>
+      </table>
+    </div>
+
+    <!-- Games -->
+    <div class="section-box">
+      <div class="section-header">
+        <div class="section-title"><div class="rbx-dot"></div>Popular Games</div>
+        <a href="https://www.pekora.zip/games" target="_blank" class="view-all-link">View All →</a>
+      </div>
+      <div class="games-grid" id="games-grid"><!-- JS --></div>
+    </div>
+
+  </main>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="side-col">
+
+    <!-- Player Lookup -->
+    <div class="section-box">
+      <div class="section-header">
+        <div class="section-title"><div class="rbx-dot"></div>Player Lookup</div>
+      </div>
+      <div class="lookup-row">
+        <input type="text" class="rbx-input" id="player-lookup-input" placeholder="Username or User ID…" />
+        <button class="btn-pekora" onclick="lookupPlayer()">Go</button>
+      </div>
+      <div id="player-result"></div>
+    </div>
+
+    <!-- Live Activity -->
+    <div class="section-box">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="rbx-dot"></div>Live Activity
+          <span style="font-size:10px;color:var(--rbx-green);font-weight:400;letter-spacing:0">● live</span>
+        </div>
+      </div>
+      <div class="activity-list" id="activity-feed"><!-- JS --></div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="section-box">
+      <div class="section-header">
+        <div class="section-title"><div class="rbx-dot"></div>Top Traders</div>
+        <span class="text-muted fs-small">by portfolio</span>
+      </div>
+      <div id="leaderboard-list"><!-- JS --></div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="section-box">
+      <div class="section-header">
+        <div class="section-title"><div class="rbx-dot"></div>Quick Links</div>
+      </div>
+      <div style="padding:8px 0">
+        <a href="https://www.pekora.zip/catalog" target="_blank" class="lb-row" style="text-decoration:none">
+          <span style="font-size:16px">🛍</span>
+          <span class="lb-name">Item Catalog</span>
+          <span class="text-muted">→</span>
+        </a>
+        <a href="https://www.pekora.zip/trade" target="_blank" class="lb-row" style="text-decoration:none">
+          <span style="font-size:16px">🔄</span>
+          <span class="lb-name">Trade Center</span>
+          <span class="text-muted">→</span>
+        </a>
+        <a href="https://www.pekora.zip/games" target="_blank" class="lb-row" style="text-decoration:none">
+          <span style="font-size:16px">🎮</span>
+          <span class="lb-name">Games</span>
+          <span class="text-muted">→</span>
+        </a>
+        <a href="https://www.pekora.zip/groups" target="_blank" class="lb-row" style="text-decoration:none">
+          <span style="font-size:16px">👥</span>
+          <span class="lb-name">Groups</span>
+          <span class="text-muted">→</span>
+        </a>
+        <a href="https://www.pekora.zip/newlogin" target="_blank" class="lb-row" style="text-decoration:none;border-bottom:none">
+          <span style="font-size:16px">⬇️</span>
+          <span class="lb-name">Download Korone</span>
+          <span class="text-muted">→</span>
+        </a>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://www.pekora.zip/catalog" target="_blank">Catalog</a>
+      <a href="https://www.pekora.zip/games" target="_blank">Games</a>
+      <a href="https://www.pekora.zip/trade" target="_blank">Trade</a>
+      <a href="https://www.pekora.zip/groups" target="_blank">Groups</a>
+      <a href="https://www.pekora.zip/forum" target="_blank">Forum</a>
+    </div>
+    <div class="footer-copy">pekora.zip Trading Dashboard — Unofficial community tool</div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════
+     ITEM MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="item-modal" role="dialog" aria-modal="true">
+  <div id="item-modal-inner"><!-- JS --></div>
+</div>
+
+<!-- Scripts -->
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
